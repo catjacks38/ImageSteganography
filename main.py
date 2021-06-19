@@ -1,43 +1,66 @@
-import imgSteganography
+import ImageSteganography
 import os
 import argparse
-
-
-def raiseErrorAndExit(error):
-    print("Sheesh, seems like there was an error while running this program:\n")
-
-    for _ in range(len(error) + 4):
-        print("=", end="")
-
-    print(f"\n| {error} |")
-
-    for _ in range(len(error) + 4):
-        print("=", end="")
-
-    print("\n\nIf this doesn't help, then you might just need to play more.")
-
-    exit(-1)
-
+from Utils import raiseErrorAndExit
+from sys import exit
 
 def main():
-    parser = argparse.ArgumentParser(description="A simple program that is used to encode data into images using steganography.")
+    parser = argparse.ArgumentParser(description="A simple program that can be used to encode data into images using steganography.")
 
-    parser.add_argument("--imgIn", type=str, help="The path to the original image you want to encode the data into.", required=True)
-    parser.add_argument("--dataFolder", type=str, help="The path to the folder you want to encode into the output image. (Everything inside of the folder will be encoded into the output image--the root folder itself will no be encoded into the output image.)", required=True)
-    parser.add_argument("imgOut", type=str, help="The output path of the new image with the data encoded in it. (I would suggest giving the output image the same file extension as the input image, but you do you.)")
+    parser.add_argument("--method", "-m", type=str, choices=["append", "dataToPix", "pixToData"], help="The method that will be used to encode/decode the data. The \"append\" method can use any type of image; The \"dataToPix\" and \"pixToData\" methods must be a \".bmp\"/bitmap image type", required=True)
+
+    parser.add_argument("--input", "-i", type=str, help="The path to the image you want to decode/encode.", required=True)
+    parser.add_argument("--data", "-d", type=str, help="The path to the data you want to encode into the output image. If the method selected is \"append\", the input path must be a folder. If the method selected is \"pixel\", the input path must be a file.")
+    parser.add_argument("output", type=str, help="The path of where the encoded or decoded data will be saved to.")
 
     args = parser.parse_args()
 
-    if not os.path.exists(args.imgIn) or not os.path.exists(args.dataFolder):
-        raiseErrorAndExit("File not found. Please check your file paths, and make sure they exist.")
+    if not os.path.exists(args.input):
+         raiseErrorAndExit("File not found. Please check your file paths, and make sure they exist.")
 
-    imgIn = open(args.imgIn, "rb")
+    if args.method != "pixToData":
+        if bool(args.data):
+            if not os.path.exists(args.data):
+                raiseErrorAndExit("File not found. Please check your file paths, and make sure they exist.")
+        else:
+            raiseErrorAndExit("Missing Data Flag.")
 
-    imgSteganography.appendDataToImg(imgIn, args.imgOut, args.dataFolder)
+    imgIn = open(args.input, "rb")
+    imgInData = imgIn.read()
+
+    if args.method == "append":
+        if os.path.isdir(args.data):
+            ImageSteganography.appendDataToImage(imgInData, args.data, args.output)
+        else:
+            raiseErrorAndExit(f"The path, \"{args.data}\" is  not a folder.")
+
+    elif args.method == "dataToPix":
+        if args.input.split(".")[-1] != "bmp":
+            raiseErrorAndExit("Not a \".bmp\"/bitmap type image.")
+        if os.path.isfile(args.data):
+            dataIn = open(args.data, "rb")
+            dataInData = dataIn.read()
+        else:
+            raiseErrorAndExit(f"The path, \"{args.data}\" is not a file.")
+
+        returnValue = ImageSteganography.dataToPixels(imgInData, dataInData, args.output)
+
+        if returnValue == -1:
+            raiseErrorAndExit(f"Data too Large for Image. {len(bytearray(dataInData))} / {len(bytearray(imgInData))} B")
+
+    elif args.method == "pixToData":
+        if args.input.split(".")[-1] != "bmp":
+            raiseErrorAndExit("Not a \".bmp\"/bitmap type image.")
+        else:
+            ImageSteganography.pixelsToData(imgInData, args.output)
 
     print("Operation Successfully Completed!")
-    print(f"Your file was saved too \"{os.path.abspath(args.imgOut)}\".")
+    print(f"Your file was saved too \"{os.path.abspath(args.output)}\".")
+
+    return 0
 
 
 if __name__ == "__main__":
     main()
+
+    exit(0)
