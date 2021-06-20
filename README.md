@@ -24,7 +24,7 @@ Linux: `./ImageSteganography [--help/-h] --method/-m {append, dataToPix, pixToDa
 
 `--data/-d`: The original source data to encode into the image. Only required for the "dataToPix" and "append" methods.* (optional/required)
 
-`--channel/-c`: The image channel to encode/decode the data from.
+`--channel/-c`: The image channel to encode/decode the data from. It's a number from one to four. Channel one is red, channel two is green, channel three is blue, and channel four is alpha. (optional/required)
 
 The last positional argument is the path of the output file to save. (required)
 
