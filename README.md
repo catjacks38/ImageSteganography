@@ -8,6 +8,7 @@ https://en.wikipedia.org/wiki/Steganography
 
 ## Script Requirements:
 1. Python 3
+2. opencv-python
 
 ## CLI Usage:
 Windows: `ImageSteganography.exe [--help/-h] --method/-m {append, dataToPix, pixToData} --input/-i <input file path> [--data/-d <path to data to encode>] [--channel, -c <channel>] <file output path>`
