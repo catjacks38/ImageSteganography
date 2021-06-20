@@ -10,9 +10,9 @@ https://en.wikipedia.org/wiki/Steganography
 1. Python 3
 
 ## CLI Usage:
-Windows: `ImageSteganography.exe [--help/-h] --method/-m {append, dataToPix, pixToData} --input/-i <input file path> [--data/-d <path to data to encode>] <file output path>`
+Windows: `ImageSteganography.exe [--help/-h] --method/-m {append, dataToPix, pixToData} --input/-i <input file path> [--data/-d <path to data to encode>] [--channel, -c <channel>] <file output path>`
 
-Linux: `./ImageSteganography [--help/-h] --method/-m {append, dataToPix, pixToData} --input/-i <input file path> [--data/-d <path to data to encode>] <file output path>`
+Linux: `./ImageSteganography [--help/-h] --method/-m {append, dataToPix, pixToData} --input/-i <input file path> [--data/-d <path to data to encode>] [--channel, -c <channel>] <file output path>`
 
 ## Argument Explanation:
 `--help/-h`: Shows the help screen. (optional)
@@ -23,6 +23,8 @@ Linux: `./ImageSteganography [--help/-h] --method/-m {append, dataToPix, pixToDa
 
 `--data/-d`: The original source data to encode into the image. Only required for the "dataToPix" and "append" methods.* (optional/required)
 
+`--channel/-c`: The image channel to encode/decode the data from.
+
 The last positional argument is the path of the output file to save. (required)
 
 \**If you are using the "append" method the source data must be a folder. But if you are using the "dataToPix" method the source data must be a file.*
@@ -30,6 +32,7 @@ The last positional argument is the path of the output file to save. (required)
 ## What does each Method do?
 1. The "append" method archives a folder in zip format, and appends it to the start of the image. The "append" method will not change the pixels in the image, but it will increase the file size from the original image.
 2. The "dataToPix" method converts the data in the original source file to pixels that are written onto the image. This method does not increase the file size of the image, but it will change the pixels in the image.
+3. The "dataToChannel" method encodes the data into a specific channel. This method is less efficient than the "dataToPix" method, but it changes the pixel data of the image less. This should not increase image size too much. I would suggest saving the image in a non-lossy image format—like bitmap or png.
 
 ## How to View the Hidden Data:
 ### If the image uses the "append" method:
@@ -41,6 +44,13 @@ Run this command:
 Windows: `ImageSteganography.exe --method pixToData --input <the path to the image you want to decode> <path to the decoded data that will be saved>`
 
 Linux: `./ImageSteganography --method pixToData --input <the path to the image you want to decode> <path to the decoded data that will be saved>`
+
+### If the image uses the "dataToChannel" method:
+Run this command:
+
+Windows: `ImageSteganography.exe --method channelToData --input <the path to the image you want to decode> --channel <channel where the data was encoded into> <path to the decoded data that will be saved>`
+
+Linux: `./ImageSteganography --method channelToData --input <the path to the image you want to decode> --channel <channel where the data was encoded into> <path to the decoded data that will be saved>`
 
 ## TODO:
 1. Add more methodes of using steganography to hide data into images
