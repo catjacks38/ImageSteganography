@@ -8,11 +8,14 @@ from sys import exit
 def main():
     parser = argparse.ArgumentParser(description="A simple program that can be used to encode data into images using steganography.")
 
-    parser.add_argument("--method", "-m", type=str, choices=["append", "dataToPix", "pixToData", "dataToChannel", "channelToData"], help="The method that will be used to encode/decode the data.", required=True)
+    parser.add_argument("--method", "-m", type=str, choices=["append", "LSBEncode", "LSBDecode", "dataToChannel", "channelToData"], help="The method that will be used to encode/decode the data.", required=True)
 
     parser.add_argument("--input", "-i", type=str, help="The path to the image you want to decode/encode.", required=True)
     parser.add_argument("--data", "-d", type=str, help="The path to the data you want to encode into the output image.")
+
     parser.add_argument("--channel", "-c", type=int, help="The channel you would like to use to encode/decode the data")
+    parser.add_argument("--LSBMode", "-l", type=int, choices=range(1, 9), help="Which LSB mode to encode/decode the image with.")
+
     parser.add_argument("output", type=str, help="The path of where the encoded or decoded data will be saved to.")
 
     args = parser.parse_args()
@@ -20,7 +23,7 @@ def main():
     if not os.path.exists(args.input):
          raiseErrorAndExit("File not found. Please check your file paths, and make sure they exist.")
 
-    if args.method != "pixToData" and args.method != "channelToData":
+    if args.method != "LSBDecode" and args.method != "channelToData":
         if bool(args.data):
             if not os.path.exists(args.data):
                 raiseErrorAndExit("File not found. Please check your file paths, and make sure they exist.")
@@ -28,7 +31,10 @@ def main():
             raiseErrorAndExit("Missing Data Flag.")
 
     if (args.method == "dataToChannel" or args.method == "channelToData") and not bool(args.channel):
-        raiseErrorAndExit("Missing channel flag.")
+        raiseErrorAndExit("Missing \"channel\" flag.")
+
+    if (args.method == "LSBDecode" or args.method == "LSBEncode") and not bool(args.LSBMode):
+        raiseErrorAndExit("Missing \"LSBMode\" flag.")
 
     if args.method == "append":
         if os.path.isdir(args.data):
@@ -39,31 +45,20 @@ def main():
         else:
             raiseErrorAndExit(f"The path, \"{args.data}\" is  not a folder.")
 
-    elif args.method == "dataToPix":
-        if args.input.split(".")[-1] != "bmp":
-            raiseErrorAndExit("Not a \".bmp\"/bitmap type image.")
+    elif args.method == "LSBEncode":
         if os.path.isfile(args.data):
-            imgIn = open(args.input, "rb")
-            imgInData = imgIn.read()
-
             dataIn = open(args.data, "rb")
             dataInData = dataIn.read()
         else:
             raiseErrorAndExit(f"The path, \"{args.data}\" is not a file.")
 
-        returnValue = ImageSteganography.dataToPixels(imgInData, dataInData, args.output)
+        returnValue = ImageSteganography.LSBEncode(args.input, dataInData, args.output, args.LSBMode)
 
         if returnValue == -1:
-            raiseErrorAndExit(f"Data too Large for Image. {len(bytearray(dataInData))} / {len(bytearray(imgInData))} B")
+            raiseErrorAndExit(f"Data too Large for Image. {len(bytearray(dataInData))} B")
 
-    elif args.method == "pixToData":
-        if args.input.split(".")[-1] != "bmp":
-            raiseErrorAndExit("Not a \".bmp\"/bitmap type image.")
-        else:
-            imgIn = open(args.input, "rb")
-            imgInData = imgIn.read()
-
-            ImageSteganography.pixelsToData(imgInData, args.output)
+    elif args.method == "LSBDecode":
+        ImageSteganography.LSBDecode(args.input, args.output, args.LSBMode)
 
     elif args.method == "dataToChannel":
         dataFile = open(args.data, "rb")
