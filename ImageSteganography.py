@@ -3,7 +3,6 @@ import os
 import cv2
 import numpy as np
 from bitstring import BitArray
-import math
 from tqdm import tqdm
 
 
@@ -77,13 +76,19 @@ def LSBEncode(inImgPath, data, outImgPath, mode):
 
     flattened = inImg.flatten()
 
+    while 1:
+        if len(dataBitString) % mode == 0:
+            break
+
+        dataBitString += "0"
+
     if mode > 8 or mode < 1 or not float(mode).is_integer():
         return -2
 
-    if len(flattened) < math.floor(len(dataBitString) / mode):
+    if len(flattened) < len(dataBitString) / mode:
         return -1
 
-    for bit in tqdm(range(math.floor(len(dataBitString) / mode))):
+    for bit in tqdm(range(int(len(dataBitString) / mode))):
         channelValueBitString = list(BitArray(uint=flattened[bit], length=8).bin)
         channelValueBitString[8 - mode:8] = dataBitString[(bit * mode):(bit * mode) + mode]
         channelValueBitString = "".join(channelValueBitString)
