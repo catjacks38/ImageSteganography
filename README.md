@@ -68,4 +68,4 @@ Linux: `./ImageSteganography --method channelToData --input <the path to the ima
 ## TODO:
 1. Add more methodes of using steganography to hide data into images
 2. Maybe add methodes of using steganography for non-image file types
-3. Add a way to store the source data file type and what arguments were used to encode the data into the image
+3. Add a way to store header data to the encoded file.
