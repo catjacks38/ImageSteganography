@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 from bitstring import BitArray
 from tqdm import tqdm
+from math import floor
 
 
 def appendDataToImage(imgInData, dataFolderPath, outImgPath):
@@ -111,8 +112,12 @@ def channelToData(inImgPath, outDataPath, channel):
 
     return 0
 
+
 def LSBEncode(inImgPath, data, outImgPath, mode):
     inImg = cv2.imread(inImgPath, cv2.IMREAD_UNCHANGED)
+
+    if inImg.shape[2] < 4:
+        inImg = cv2.cvtColor(inImg, cv2.COLOR_RGB2RGBA)
 
     dataBitString = BitArray(bytes=data).bin
 
