@@ -78,6 +78,4 @@ Windows: `ImageSteganography.exe --method channelToData --input <the path to the
 Linux: `./ImageSteganography --method channelToData --input <the path to the image you want to decode> --channel <channel where the data was encoded into> <path to the decoded data that will be saved>`
 
 ## TODO:
-1. Add more methods of using steganography to hide data into images
-2. Maybe add methods of using steganography for non-image file types
-3. Improve and refactor code
+1. Improve and refactor code
