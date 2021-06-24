@@ -65,10 +65,10 @@ def main():
         if returnValue == -1:
             raiseErrorAndExit(f"Data too Large for Image. {len(bytearray(dataInData))} B")
 
-        Utils.saveMetadata(args.output, Utils.LSBEncode, args.LSBMode, args.data.split(".")[-1])
+        Utils.saveMetadata(args.output, Utils.LSBEncode, args.LSBMode, len(dataInData), args.data.split(".")[-1])
 
     elif args.method == "LSBDecode":
-        ImageSteganography.LSBDecode(args.input, args.output, args.LSBMode)
+        ImageSteganography.LSBDecode(args.input, args.output, args.LSBMode, 0)
 
     elif args.method == "dataToChannel":
         dataFile = open(args.data, "rb")
@@ -81,7 +81,7 @@ def main():
         elif returnValue == -2:
             raiseErrorAndExit(f"There is no {args.channel} channel in the image.")
 
-        Utils.saveMetadata(args.output, Utils.dataToChannel, args.channel - 1, args.data.split(".")[-1])
+        Utils.saveMetadata(args.output, Utils.dataToChannel, args.channel - 1, 0, args.data.split(".")[-1])
 
     elif args.method == "channelToData":
         returnValue = ImageSteganography.channelToData(args.input, args.output, args.channel - 1)

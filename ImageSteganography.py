@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 from bitstring import BitArray
 from tqdm import tqdm
-from math import floor
+from math import floor, ceil
 import Utils
 
 
@@ -148,7 +148,7 @@ def LSBEncode(inImgPath, data, outImgPath, mode):
     return 0
 
 
-def LSBDecode(inImgPath, outPath, mode):
+def LSBDecode(inImgPath, outPath, mode, fileSize):
     if mode > 8 or mode < 1 or not float(mode).is_integer():
         return -2
 
@@ -162,8 +162,18 @@ def LSBDecode(inImgPath, outPath, mode):
     flattened = inImg.flatten()
     bits = ""
 
-    for pixel in tqdm(flattened):
-        bits = bits + BitArray(uint=pixel, length=8).bin[8 - mode:8]
+    if not fileSize <= 0:
+        for pixel in tqdm(flattened[0:ceil((fileSize * 8) / mode)]):
+            bits = bits + BitArray(uint=pixel, length=8).bin[8 - mode:8]
+    else:
+        for pixel in tqdm(flattened):
+            bits = bits + BitArray(uint=pixel, length=8).bin[8 - mode:8]
+
+    while 1:
+        if len(bits) % 8 == 0:
+            break
+
+        bits += "0"
 
     outFile.write(BitArray(bin=bits).bytes)
 
@@ -179,15 +189,16 @@ def autoDecode(inImgPath, outPath):
     if metadata[0] == Utils.dataToChannel:
         print("Encoding Method: dataToChannel")
         print(f"Channel: {metadata[1] + 1}")
-        print(f"File Extension: {metadata[2]}")
+        print(f"File Extension: {metadata[3]}")
 
-        returnValue = channelToData(inImgPath, f"{outPath}.{metadata[2]}", metadata[1])
+        returnValue = channelToData(inImgPath, f"{outPath}.{metadata[3]}", metadata[1])
     elif metadata[0] == Utils.LSBEncode:
         print("Encoding Method: LSBEncode")
         print(f"LSBMode: {metadata[1]}")
-        print(f"File Extension: {metadata[2]}")
+        print(f"File Size: {metadata[2]}")
+        print(f"File Extension: {metadata[3]}")
 
-        returnValue = LSBDecode(inImgPath, f"{outPath}.{metadata[2]}", metadata[1])
+        returnValue = LSBDecode(inImgPath, f"{outPath}.{metadata[3]}", metadata[1], metadata[2])
     else:
         return -3
 
