@@ -12,11 +12,12 @@ https://en.wikipedia.org/wiki/Steganography
 3. bitstring
 4. tqdm
 5. numpy
+6. pillow
 
 ## CLI Usage:
-Windows: `ImageSteganography.exe [--help/-h] --method/-m {append, LSBEncode, LSBDecode, dataToChannel, channelToData} --input/-i <input file path> [--data/-d <data file path>] [--channel/-c <channel>] [--LSBMode {1-8}] <output file path>`
+Windows: `ImageSteganography.exe [--help/-h] --method/-m {append, LSBEncode, LSBDecode, dataToChannel, channelToData, autoDecode} --input/-i <input file path> [--data/-d <data file path>] [--channel/-c <channel>] [--LSBMode {1-8}] <output file path>`
 
-Linux: `./ImageSteganography [--help/-h] --method/-m {append, LSBEncode, LSBDecode, dataToChannel, channelToData} --input/-i <input file path> [--data/-d <data file path>] [--channel/-c <channel>] [--LSBMode {1-8}] <output file path>`
+Linux: `./ImageSteganography [--help/-h] --method/-m {append, LSBEncode, LSBDecode, dataToChannel, channelToData, autoDecode} --input/-i <input file path> [--data/-d <data file path>] [--channel/-c <channel>] [--LSBMode {1-8}] <output file path>`
 
 ## Argument Explanation:
 `--help/-h`: Shows the help screen. (optional)
@@ -27,6 +28,7 @@ Linux: `./ImageSteganography [--help/-h] --method/-m {append, LSBEncode, LSBDeco
 3. LSBDecode
 4. dataToChannel
 5. channelToData
+6. autoDecode
 
 (required)
 
@@ -38,7 +40,7 @@ Linux: `./ImageSteganography [--help/-h] --method/-m {append, LSBEncode, LSBDeco
 
 `--LSBMode/-l`: The amount of least significant bits that will be used to encode/decode the data per pixel. Can only be a value from one to eight. You must use this argument for the "LSBEncode" and "LSBDecode" methods. (optional/required)
 
-The last positional argument is the path of the output file to save. (required)
+The last positional argument is the path of the output file to save. If the "autoDecode" method is used, provide a file path without the extension. The "autoDecode" method will automatically put the correct file extension at the end of the path. (required)
 
 \**If you are using the "append" method the source data must be a folder. But if you are using the "LSBEncode" or the "dataToChannel" methods, the source data must be a file.*
 
@@ -48,6 +50,16 @@ The last positional argument is the path of the output file to save. (required)
 3. The "LSBEncode" method writes each bit from the source data into the least significant bits of your choice (LSBMode) of each channel value in the image. Using a smaller LSBMode is less noticeable than a higher LSBMode, but you will need a larger image to store the same amount of data. If you set the LSBMode to eight, it will give results like what the old "dataToPix" method used to do. Due to the higher complexity of this method, it takes longer to encode and decode compared to the other methods. But it isn't too much longer.
 
 ## How to View the Hidden Data:
+
+### Suggested method (try this first):
+Run this command:
+
+Windows: `ImageSteganography.exe --method autoDecode --input <the path to the input image you want to decode> <path to decoded output without the file extension>`
+
+Linux: `./ImageSteganography --method autoDecode --input <the path to the input image you want to decode> <path to decoded output without the file extension>`
+
+If this method returns the error, "Input image has corrupted or non-existent metadata to be auto decoded.", the "autoDecode" method will not work. Try the other methods.
+
 ### If the image uses the "append" method:
 Open the image in a zip extractor, and extract the contents. Any zip extractor should work. I used 7-Zip while testing this method.
 
@@ -66,6 +78,6 @@ Windows: `ImageSteganography.exe --method channelToData --input <the path to the
 Linux: `./ImageSteganography --method channelToData --input <the path to the image you want to decode> --channel <channel where the data was encoded into> <path to the decoded data that will be saved>`
 
 ## TODO:
-1. Add more methodes of using steganography to hide data into images
-2. Maybe add methodes of using steganography for non-image file types
-3. Add a way to store header data to the encoded file.
+1. Add more methods of using steganography to hide data into images
+2. Maybe add methods of using steganography for non-image file types
+3. Improve and refactor code
