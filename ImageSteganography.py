@@ -5,6 +5,7 @@ import numpy as np
 from bitstring import BitArray
 from tqdm import tqdm
 from math import floor
+import Utils
 
 
 def appendDataToImage(imgInData, dataFolderPath, outImgPath):
@@ -167,3 +168,28 @@ def LSBDecode(inImgPath, outPath, mode):
     outFile.write(BitArray(bin=bits).bytes)
 
     return 0
+
+
+def autoDecode(inImgPath, outPath):
+    metadata = Utils.readMetadata(inImgPath)
+
+    if not type(metadata) is tuple:
+        return -4
+
+    if metadata[0] == Utils.dataToChannel:
+        print("Encoding Method: dataToChannel")
+        print(f"Channel: {metadata[1] + 1}")
+        print(f"File Extension: {metadata[2]}")
+
+        returnValue = channelToData(inImgPath, f"{outPath}.{metadata[2]}", metadata[1])
+    elif metadata[0] == Utils.LSBEncode:
+        print("Encoding Method: LSBEncode")
+        print(f"LSBMode: {metadata[1]}")
+        print(f"File Extension: {metadata[2]}")
+
+        returnValue = LSBDecode(inImgPath, f"{outPath}.{metadata[2]}", metadata[1])
+    else:
+        return -3
+
+    return returnValue
+

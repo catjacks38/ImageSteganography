@@ -1,9 +1,9 @@
 from sys import exit
+from PIL.PngImagePlugin import PngImageFile, PngInfo
 
+dataToChannel = 0
 LSBEncode = 1
 
-start = 38
-end = 1
 
 def raiseErrorAndExit(error):
     print("Sheesh, seems like there was an error while running this program:\n")
@@ -21,33 +21,24 @@ def raiseErrorAndExit(error):
     exit(-1)
 
 
-def genHeaderData(method, option, fileExtension):
-    global start
-    global end
+def saveMetadata(outImgPath, method, option, fileExtension):
+    inImg = PngImageFile(outImgPath)
 
-    header = [start, method, option]
+    metadata = PngInfo()
+    metadata.add_text("method", str(method))
+    metadata.add_text("option", str(option))
+    metadata.add_text("fileExtension", fileExtension)
 
-    for char in fileExtension:
-        header.append(ord(char))
+    inImg.save(outImgPath, pnginfo=metadata)
 
-    header.append(end)
-
-    return header
+    return 0
 
 
-def getHeaderData(data):
-    global start
-    global end
+def readMetadata(inImgPath):
+    inImg = PngImageFile(inImgPath)
+    metadata = inImg.text
 
-    fileExtension = ""
-
-    if data[0] != start:
+    try:
+        return int(metadata["method"]), int(metadata["option"]), metadata["fileExtension"]
+    except:
         return -1
-
-    for byte in data[3:]:
-        if byte == end:
-            break
-
-        fileExtension += chr(byte)
-
-    return data[1], data[2], fileExtension
