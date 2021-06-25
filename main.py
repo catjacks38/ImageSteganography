@@ -1,7 +1,6 @@
 import ImageSteganography
 import os
 import argparse
-
 import Utils
 from Utils import raiseErrorAndExit
 from sys import exit
@@ -10,6 +9,7 @@ from sys import exit
 def main():
     parser = argparse.ArgumentParser(description="A simple program that can be used to encode data into images using steganography.")
 
+    # Adds arguments to parser.
     parser.add_argument("--method", "-m", type=str, choices=["append", "LSBEncode", "LSBDecode", "dataToChannel", "channelToData", "autoDecode"], help="The method that will be used to encode/decode the data.", required=True)
 
     parser.add_argument("--input", "-i", type=str, help="The path to the image you want to decode/encode.", required=True)
@@ -22,9 +22,11 @@ def main():
 
     args = parser.parse_args()
 
+    # Input file path check.
     if not os.path.exists(args.input):
          raiseErrorAndExit("File not found. Please check your file paths, and make sure they exist.")
 
+    # Data flag and file path check:
     if args.method != "LSBDecode" and args.method != "channelToData" and args.method != "autoDecode":
         if bool(args.data):
             if not os.path.exists(args.data):
@@ -32,18 +34,22 @@ def main():
         else:
             raiseErrorAndExit("Missing Data Flag.")
 
+    # Channel flag check.
     if (args.method == "dataToChannel" or args.method == "channelToData") and not bool(args.channel):
         raiseErrorAndExit("Missing \"channel\" flag.")
 
+    # LSBMode flag check.
     if (args.method == "LSBDecode" or args.method == "LSBEncode") and not bool(args.LSBMode):
         raiseErrorAndExit("Missing \"LSBMode\" flag.")
 
+    # PNG file checks.
     if (args.method == "LSBEncode" or args.method == "dataToChannel") and args.output.split(".")[-1] != "png":
         raiseErrorAndExit("Output file must be a \"PNG\" file.")
 
     if args.method == "autoDecode" and args.input.split(".")[-1] != "png":
         raiseErrorAndExit("Input must be a \"PNG\" file.")
 
+    # Argument Parsing.
     if args.method == "append":
         if os.path.isdir(args.data):
             imgIn = open(args.input, "rb")
@@ -95,6 +101,7 @@ def main():
         if returnValue != 0:
             raiseErrorAndExit("Input image has corrupted or non-existent metadata to be auto decoded.")
 
+    # Prints success message and exits function.
     print("Operation Successfully Completed!")
     print(f"Your file was saved too \"{os.path.abspath(args.output)}\".")
 
@@ -103,5 +110,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
     exit(0)

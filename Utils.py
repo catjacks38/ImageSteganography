@@ -22,23 +22,29 @@ def raiseErrorAndExit(error):
 
 
 def saveMetadata(outImgPath, method, option, fileSize, fileExtension):
+    # Opens PNG image.
     inImg = PngImageFile(outImgPath)
 
+    # Creates metadata.
     metadata = PngInfo()
     metadata.add_text("method", str(method))
     metadata.add_text("option", str(option))
     metadata.add_text("fileSize", str(fileSize))
     metadata.add_text("fileExtension", fileExtension)
 
+    # Saves metadata to image
     inImg.save(outImgPath, pnginfo=metadata)
 
     return 0
 
 
 def readMetadata(inImgPath):
+    # Reads and extracts metadata
     inImg = PngImageFile(inImgPath)
     metadata = inImg.text
 
+    # Checks to make sure there is metadata.
+    # Returns -1 if metadata is not found.
     try:
         return int(metadata["method"]), int(metadata["option"]), int(metadata["fileSize"]), metadata["fileExtension"]
     except:
