@@ -184,7 +184,7 @@ def LSBDecode(inImgPath, outPath, mode, fileSize):
 
     # Relevant bits are extracted, padding 0s are dropped
     # (bytes, bits) -> ({fileSize*mode} bytes, {mode} bits) -> padded flattened bits ->  relevant flattened bits -> bitString
-    bits = "".join(imgBits[0:(fileSize*mode), (8-mode):].flatten())[0:fileSize*8]
+    bits = "".join(imgBits[0:(fileSize*8*mode), (8-mode):].flatten())[0:fileSize*8]
 
     # bitString -> BitArray -> bytes -> file
     outFile.write(BitArray(bin=bits).bytes)
