@@ -99,10 +99,13 @@ def channelToData(inImgPath, outDataPath, channel, fileSize):
     except:
         return -2
 
+
     # dataToChannel writes the shift utilized for encoding, the inverse operator must be used here (+ -> -, - -> +)
     shift = -1*(flattened[0])
 
     pixCount = flattened[1] + shift
+
+    fileSize = len(flattened)/pixCount - 2 if fileSize == -1 else fileSize
 
     # Split array of (fileSize, pixCount) into three arrays of (fileSize, 1) for summation
     dataArr = flattened[2:fileSize*pixCount+2].reshape([fileSize, pixCount]) + shift
@@ -180,9 +183,92 @@ def LSBDecode(inImgPath, outPath, mode, fileSize):
     flattened = inImg.flatten()
     imgBits = np.array(list(BitArray(bytes=flattened).bin)).reshape([len(flattened), 8])
 
+    # Will read every byte from the image if no fileSize could be read from metadata
+    fileSize = len(flattened)*mode // 8 if fileSize == -1 else fileSize
+
     # Relevant bits are extracted, padding 0s are dropped
-    # (bytes, bits) -> ({fileSize*mode} bytes, {mode} bits) -> padded flattened bits ->  relevant flattened bits -> bitString
-    bits = "".join(imgBits[0:(fileSize*8*mode), (8-mode):].flatten())[0:fileSize*8]
+    # (bytes, bits) -> ({fileSizeBits/mode} bytes, {mode} bits) -> padded flattened bits ->  relevant flattened bits -> bitString
+    bits = "".join(imgBits[0:(fileSize*8//mode), (8-mode):].flatten())[0:fileSize*8]
+
+    # bitString -> BitArray -> bytes -> file
+    outFile.write(BitArray(bin=bits).bytes)
+
+    return 0
+
+def LSBCEncode(inImgPath, data, outImgPath, mode, channel):
+    
+        # In this case, -2 is indicitive of an invalid mode
+    if mode > 8 or mode < 1 or not float(mode).is_integer():
+        return -2
+
+
+    inImg = cv2.imread(inImgPath, cv2.IMREAD_UNCHANGED)
+
+    # Greater channel count increases data capacity; 
+    # Won't remove existing alpha from images, but adds channel for jpgs and non-alphas
+    if inImg.shape[2] < 4:
+        inImg = cv2.cvtColor(inImg, cv2.COLOR_RGB2RGBA)
+
+    # Creates a bitstring padded to a multiple of {mode}
+    dataBitString = list(BitArray(bytes=data).bin) 
+    dataBitString += ["0"]*(mode - len(dataBitString)%mode if len(dataBitString) % mode else 0)
+
+    # Initial array of data, padding 0s will be cut during bitString slicing at decode
+    dataArray = np.array(dataBitString).reshape([len(dataBitString) // mode, mode])
+
+    # The (bytes, bits) model is key to encoding LSB without iteration
+    # (shaped bytes -> flattened channel bytes -> BitArray -> bitString -> list of bits -> flattened bits -> (bytes, bits))
+
+    try:
+        flattened = inImg[:, :, channel].flatten()
+    except:
+        return -2
+    
+    imgBits = np.array(list(BitArray(bytes=flattened).bin)).reshape([len(flattened), 8])
+
+    if imgBits.shape[0] < dataArray.shape[0]:
+        return -1
+
+    # matches dataArray to the length of the image, reducing suspicion due to a cutoff of noise
+    dataLong = np.concatenate([dataArray]*(imgBits.shape[0] // dataArray.shape[0]) + [ dataArray[0:(imgBits.shape[0] % dataArray.shape[0])] ]) 
+
+    # Merges imgBits of (bytes, 8-mode) and dataLong, of (bytes, mode) to a resulting image of (bytes, bits)
+    fullArray = np.concatenate((imgBits[:,:(8-mode)], dataLong), 1)   
+
+    # ((bytes, bits) -> flattened bits -> bitString -> BitArray -> flattened bytes -> shaped channel bytes -> full img); 
+
+    outputArr = np.array(bytearray(BitArray( bin="".join(fullArray.flatten()) ).bytes))
+
+    inImg[:, :, channel] = np.reshape(outputArr, (inImg.shape[0], inImg.shape[1]))
+
+    cv2.imwrite(outImgPath, inImg)
+
+    return 0
+
+def LSBCDecode(inImgPath, outPath, mode, channel, fileSize):
+    
+    # In this case, -2 is indicitive of an invalid mode
+    if mode > 8 or mode < 1 or not float(mode).is_integer():
+        return -2
+
+    inImg = cv2.imread(inImgPath, cv2.IMREAD_UNCHANGED)
+
+    # Removes the output file, if it already exists.
+    if os.path.exists(outPath):
+        os.remove(outPath)
+
+    outFile = open(outPath, "wb")
+
+    # (shaped bytes -> flattened bytes -> BitArray -> bitString -> list of bits -> flattened bits -> (bytes, bits)) 
+    flattened = inImg[:, :, channel].flatten()
+    imgBits = np.array(list(BitArray(bytes=flattened).bin)).reshape([len(flattened), 8])
+
+    # Will read every byte from the image if no fileSize could be read from metadata
+    fileSize = len(flattened)*mode // 8 if fileSize == -1 else fileSize
+
+    # Relevant bits are extracted, padding 0s are dropped
+    # (bytes, bits) -> ({fileSizeBits/mode} bytes, {mode} bits) -> padded flattened bits ->  relevant flattened bits -> bitString
+    bits = "".join(imgBits[0:(fileSize*8//mode), (8-mode):].flatten())[0:fileSize*8]
 
     # bitString -> BitArray -> bytes -> file
     outFile.write(BitArray(bin=bits).bytes)
@@ -202,20 +288,32 @@ def autoDecode(inImgPath, outPath):
     # If the method can not be found, the function returns -3
     if metadata[0] == Utils.dataToChannel:
         print("Encoding Method: dataToChannel")
-        print(f"Channel: {metadata[1] + 1}")
+        print(f"Channel: {metadata[1][0] + 1}")
         print(f"File Size: {metadata[2]}")
         print(f"File Extension: {metadata[3]}")
 
-        returnValue = channelToData(inImgPath, f"{outPath}.{metadata[3]}", metadata[1], metadata[2])
+        returnValue = channelToData(inImgPath, f"{outPath}.{metadata[3]}", metadata[1][0], metadata[2])
+
     elif metadata[0] == Utils.LSBEncode:
         print("Encoding Method: LSBEncode")
-        print(f"LSBMode: {metadata[1]}")
+        print(f"LSBMode: {metadata[1][0]}")
         print(f"File Size: {metadata[2]}")
         print(f"File Extension: {metadata[3]}")
 
-        returnValue = LSBDecode(inImgPath, f"{outPath}.{metadata[3]}", metadata[1], metadata[2])
+        returnValue = LSBDecode(inImgPath, f"{outPath}.{metadata[3]}", metadata[1][0], metadata[2])
+
+    elif metadata[0] == Utils.LSBCEncode:
+        print("Encoding Method: LSBCEncode")
+        print(f"LSBMode: {metadata[1][0]}")
+        print(f"Channel: {metadata[1][1]}")
+        print(f"File Size: {metadata[2]}")
+        print(f"File Extension: {metadata[3]}")
+
+        returnValue = LSBCDecode(inImgPath, f"{outPath}.{metadata[3]}", metadata[1][0], metadata[1][1] - 1, metadata[2])
     else:
         return -3
+
+
 
     # Returns the return value of the method that was used.
     # Should be 0 if there was no errors.
