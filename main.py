@@ -39,7 +39,18 @@ def main():
         raiseErrorAndExit("Missing \"channel\" flag.")
 
     # LSBMode flag check.
-    if (args.method in ["LSBDecode", "LSBEncode", "LSBCEncode", "LSBCDecode"]) and not bool(args.LSBMode):
+    if (args.method in ["LSBEncode", "LSBCEncode"]) and not bool(args.LSBMode):
+        print("Missing \"LSBMode\" flag.\nAttempting to find optimal LSBMode...")
+        with open(args.data, "rb") as dataFile:
+            readData = dataFile.read()
+            args.LSBMode = Utils.optimalLSBMode(args.input, readData, False if args.method == "LSBEncode" else True)
+
+            if args.LSBMode == -1:
+                raiseErrorAndExit(f"Could not find suitable LSBMode for image, because source data size of {len(readData)} B is too large.")
+
+            print(f"Using optimal LSBMode of {args.LSBMode}!")
+
+    elif (args.method in ["LSBDecode", "LSBCDecode"]) and not bool(args.LSBMode):
         raiseErrorAndExit("Missing \"LSBMode\" flag.")
 
     # PNG file checks.
@@ -74,8 +85,11 @@ def main():
         Utils.saveMetadata(args.output, Utils.LSBEncode, args.LSBMode, len(data), args.data.split(".")[-1])
 
     elif args.method == "LSBDecode":
-        try: fileSize = Utils.readMetadata(args.input)[2] 
-        except: fileSize = -1
+        try:
+            fileSize = Utils.readMetadata(args.input)[2]
+        except:
+            fileSize = -1
+
         ImageSteganography.LSBDecode(args.input, args.output, args.LSBMode, fileSize)
 
     elif args.method == "LSBCEncode":
@@ -95,8 +109,11 @@ def main():
         Utils.saveMetadata(args.output, Utils.LSBCEncode, f"{args.LSBMode} {args.channel}", len(data), args.data.split(".")[-1])
 
     elif args.method == "LSBCDecode":
-        try: fileSize = Utils.readMetadata(args.input)[2] 
-        except: fileSize = -1
+        try:
+            fileSize = Utils.readMetadata(args.input)[2]
+        except:
+            fileSize = -1
+
         ImageSteganography.LSBCDecode(args.input, args.output, args.LSBMode, args.channel - 1, fileSize)
 
     elif args.method == "dataToChannel":
@@ -107,15 +124,17 @@ def main():
         returnValue = ImageSteganography.dataToChannel(args.input, data, args.output, args.channel - 1)
 
         if returnValue == -1:
-            raiseErrorAndExit(f"Data file too large for image. Data file size: {len(bytearray(data))}")
+            raiseErrorAndExit(f"Data file too large for image. Data file size: {len(data)}")
         elif returnValue == -2:
             raiseErrorAndExit(f"There is no {args.channel} channel in the image.")
 
         Utils.saveMetadata(args.output, Utils.dataToChannel, args.channel - 1, len(data), args.data.split(".")[-1])
 
     elif args.method == "channelToData": 
-        try: fileSize = Utils.readMetadata(args.input)[2] 
-        except: fileSize = -1
+        try:
+            fileSize = Utils.readMetadata(args.input)[2]
+        except:
+            fileSize = -1
 
         returnValue = ImageSteganography.channelToData(args.input, args.output, args.channel - 1, fileSize)
 

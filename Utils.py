@@ -1,5 +1,6 @@
 from sys import exit
 from PIL.PngImagePlugin import PngImageFile, PngInfo
+import cv2
 
 dataToChannel = 0
 LSBEncode = 1
@@ -50,3 +51,24 @@ def readMetadata(inImgPath):
         return int(metadata["method"]), list(map(int, metadata["option"].split())), int(metadata["fileSize"]), metadata["fileExtension"]
     except:
         return -1
+
+
+def optimalLSBMode(inImgPath, data, isLSBC):
+    # Reads the input image and gets size of data in bits.
+    inImg = cv2.imread(inImgPath, cv2.IMREAD_UNCHANGED)
+    dataBitSize = len(data) * 8
+
+    # Calculates correct max data size based on which LSB encoding method is chosen.
+    if isLSBC:
+        maxSize = inImg.shape[0] * inImg.shape[1]
+
+    else:
+        maxSize = inImg.shape[0] * inImg.shape[1] * 4
+
+    # Finds lowest LSBMode to use for LSBEncode or LSBCEncode.
+    for mode in range(1, 9):
+        if dataBitSize // mode < maxSize:
+            return mode
+
+    # If no optimal LSBMode is found, the function returns -1.
+    return -1
