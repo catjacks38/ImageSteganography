@@ -189,6 +189,55 @@ def LSBDecode(inImgPath, outPath, mode, fileSize):
 
     return 0
 
+def LSBCEncode(inImgPath, data, outImgPath, mode, channel):
+    
+        # In this case, -2 is indicitive of an invalid mode
+    if mode > 8 or mode < 1 or not float(mode).is_integer():
+        return -2
+
+
+    inImg = cv2.imread(inImgPath, cv2.IMREAD_UNCHANGED)
+
+    # Greater channel count increases data capacity; 
+    # Won't remove existing alpha from images, but adds channel for jpgs and non-alphas
+    if inImg.shape[2] < 4:
+        inImg = cv2.cvtColor(inImg, cv2.COLOR_RGB2RGBA)
+
+    # Creates a bitstring padded to a multiple of {mode}
+    dataBitString = list(BitArray(bytes=data).bin) 
+    dataBitString += ["0"]*(mode - len(dataBitString)%mode if len(dataBitString) % mode else 0)
+
+    # Initial array of data, padding 0s will be cut during bitString slicing at decode
+    dataArray = np.array(dataBitString).reshape([len(dataBitString) // mode, mode])
+
+    # The (bytes, bits) model is key to encoding LSB without iteration
+    # (shaped bytes -> flattened channel bytes -> BitArray -> bitString -> list of bits -> flattened bits -> (bytes, bits))
+
+    try:
+        flattened = inImg[:, :, channel].flatten()
+    except:
+        return -2
+    
+    imgBits = np.array(list(BitArray(bytes=flattened).bin)).reshape([len(flattened), 8])
+
+    if imgBits.shape[0] < dataArray.shape[0]:
+        return -1
+
+    # matches dataArray to the length of the image, reducing suspicion due to a cutoff of noise
+    dataLong = np.concatenate([dataArray]*(imgBits.shape[0] // dataArray.shape[0]) + [ dataArray[0:(imgBits.shape[0] % dataArray.shape[0])] ]) 
+
+    # Merges imgBits of (bytes, 8-mode) and dataLong, of (bytes, mode) to a resulting image of (bytes, bits)
+    fullArray = np.concatenate((imgBits[:,:(8-mode)], dataLong), 1)   
+
+    # ((bytes, bits) -> flattened bits -> bitString -> BitArray -> flattened bytes -> shaped channel bytes -> full img); 
+
+    outputArr = np.array(bytearray(BitArray( bin="".join(fullArray.flatten()) ).bytes))
+
+    inImg[:, :, channel] = np.reshape(outputArr, (inImg.shape[0], inImg.shape[1]))
+
+    cv2.imwrite(outImgPath, inImg)
+
+    return 0
 
 def autoDecode(inImgPath, outPath):
     # Grabs metadata from image
@@ -220,3 +269,5 @@ def autoDecode(inImgPath, outPath):
     # Returns the return value of the method that was used.
     # Should be 0 if there was no errors.
     return returnValue
+
+
