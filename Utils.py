@@ -3,6 +3,7 @@ from PIL.PngImagePlugin import PngImageFile, PngInfo
 
 dataToChannel = 0
 LSBEncode = 1
+LSBCEncode = 2
 
 
 def raiseErrorAndExit(error):
@@ -46,6 +47,6 @@ def readMetadata(inImgPath):
     # Checks to make sure there is metadata.
     # Returns -1 if metadata is not found.
     try:
-        return int(metadata["method"]), int(metadata["option"]), int(metadata["fileSize"]), metadata["fileExtension"]
+        return int(metadata["method"]), list(map(int, metadata["option"].split())), int(metadata["fileSize"]), metadata["fileExtension"]
     except:
         return -1
