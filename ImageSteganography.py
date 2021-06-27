@@ -3,7 +3,6 @@ import os
 import cv2
 import numpy as np
 from bitstring import BitArray
-from tqdm import tqdm
 import Utils
 
 
