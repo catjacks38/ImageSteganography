@@ -52,8 +52,8 @@ def main():
     # Argument Parsing.
     if args.method == "append":
         if os.path.isdir(args.data):
-            imgIn = open(args.input, "rb")
-            imgInData = imgIn.read()
+            with open(args.input, "rb") as imgIn:
+                imgInData = imgIn.read()
 
             ImageSteganography.appendDataToImage(imgInData, args.data, args.output)
         else:
