@@ -39,7 +39,7 @@ def main():
         raiseErrorAndExit("Missing \"channel\" flag.")
 
     # LSBMode flag check.
-    if (args.method == "LSBDecode" or args.method == "LSBEncode") and not bool(args.LSBMode):
+    if (args.method in ["LSBDecode", "LSBEncode", "LSBCEncode", "LSBCDecode"]) and not bool(args.LSBMode):
         raiseErrorAndExit("Missing \"LSBMode\" flag.")
 
     # PNG file checks.
@@ -72,7 +72,6 @@ def main():
             raiseErrorAndExit(f"Data too Large for Image. {len(bytearray(data))} B")
 
         Utils.saveMetadata(args.output, Utils.LSBEncode, args.LSBMode, len(data), args.data.split(".")[-1])
-    
 
     elif args.method == "LSBDecode":
         try: fileSize = Utils.readMetadata(args.input)[2] 
@@ -131,7 +130,11 @@ def main():
 
     # Prints success message and exits function.
     print("Operation Successfully Completed!")
-    print(f"Your file was saved too \"{os.path.abspath(args.output)}\".")
+    if args.method == "autoDecode":
+        metadata = Utils.readMetadata(args.input)
+        print(f"Your file was saved to \"{os.path.abspath(args.output)}.{metadata[3]}\".")
+    else:
+        print(f"Your file was saved to \"{os.path.abspath(args.output)}\".")
 
     return 0
 

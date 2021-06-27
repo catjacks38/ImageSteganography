@@ -28,14 +28,14 @@ def appendDataToImage(imgInData, dataFolderPath, outImgPath):
     return 0
 
 
-
 def dataToChannel(inImgPath, data, outImgPath, channel):
     # The only material advantage of D2C over by-channel LSB (Implementation In-Progress) is speed
 
     img = cv2.imread(inImgPath, cv2.IMREAD_UNCHANGED)
 
     # Helps with reading in jpgs, but won't remove existing alpha
-    if img.shape[2] < 4: img = cv2.cvtColor(img, cv2.COLOR_RGB2RGBA)
+    if img.shape[2] < 4:
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2RGBA)
 
     try:
         flattened = img[:, :, channel].flatten()
@@ -61,15 +61,15 @@ def dataToChannel(inImgPath, data, outImgPath, channel):
 
     # Especially helpful for alpha
     # Localizing would be better, but more costly
-    meanF = round(sum(flattened)/len(flattened))
-    meanD = round(sum(fullData)/len(fullData))
+    meanF = round(sum(flattened) / len(flattened))
+    meanD = round(sum(fullData) / len(fullData))
     shiftOpt = meanF - meanD
 
     # Ensure shift in [0, 255]
-    if max(fullData)+shiftOpt > 255: 
-        shift = 255-max(fullData)      
-    elif min(fullData)+shiftOpt < 0:
-        shift = 0-min(fullData)
+    if max(fullData) + shiftOpt > 255:
+        shift = 255 - max(fullData)
+    elif min(fullData) + shiftOpt < 0:
+        shift = 0 - min(fullData)
     else: 
         shift = shiftOpt
 
@@ -93,22 +93,21 @@ def channelToData(inImgPath, outDataPath, channel, fileSize):
 
     outDataFile = open(outDataPath, "wb")
 
-    # -2 is indicitive of a non-existant channel 
+    # -2 is indicative of a non-existent channel
     try:
         flattened = img[:, :, channel].flatten()
     except:
         return -2
 
-
     # dataToChannel writes the shift utilized for encoding, the inverse operator must be used here (+ -> -, - -> +)
-    shift = -1*(flattened[0])
+    shift = -1 * (flattened[0])
 
     pixCount = flattened[1] + shift
 
-    fileSize = len(flattened)/pixCount - 2 if fileSize == -1 else fileSize
+    fileSize = len(flattened) / pixCount - 2 if fileSize == -1 else fileSize
 
     # Split array of (fileSize, pixCount) into three arrays of (fileSize, 1) for summation
-    dataArr = flattened[2:fileSize*pixCount+2].reshape([fileSize, pixCount]) + shift
+    dataArr = flattened[2:fileSize*pixCount + 2].reshape([fileSize, pixCount]) + shift
     byteArrs = np.split(dataArr, pixCount, 1)
     
     # flattenedFin should be dataToChannel's np.array(data)
@@ -122,10 +121,9 @@ def channelToData(inImgPath, outDataPath, channel, fileSize):
 
 def LSBEncode(inImgPath, data, outImgPath, mode):
     
-    # In this case, -2 is indicitive of an invalid mode
+    # In this case, -2 is indicative of an invalid mode
     if mode > 8 or mode < 1 or not float(mode).is_integer():
         return -2
-
 
     inImg = cv2.imread(inImgPath, cv2.IMREAD_UNCHANGED)
 
@@ -136,7 +134,7 @@ def LSBEncode(inImgPath, data, outImgPath, mode):
 
     # Creates a bitstring padded to a multiple of {mode}
     dataBitString = list(BitArray(bytes=data).bin) 
-    dataBitString += ["0"]*(mode - len(dataBitString)%mode if len(dataBitString) % mode else 0)
+    dataBitString += ["0"] * (mode - len(dataBitString) % mode if len(dataBitString) % mode else 0)
 
     # Initial array of data, padding 0s will be cut during bitString slicing at decode
     dataArray = np.array(dataBitString).reshape([len(dataBitString) // mode, mode])
@@ -151,14 +149,14 @@ def LSBEncode(inImgPath, data, outImgPath, mode):
         return -1
 
     # matches dataArray to the length of the image, reducing suspicion due to a cutoff of noise
-    dataLong = np.concatenate([dataArray]*(imgBits.shape[0] // dataArray.shape[0]) + [ dataArray[0:(imgBits.shape[0] % dataArray.shape[0])] ]) 
+    dataLong = np.concatenate([dataArray]*(imgBits.shape[0] // dataArray.shape[0]) + [dataArray[0:(imgBits.shape[0] % dataArray.shape[0])]])
 
     # Merges imgBits of (bytes, 8-mode) and dataLong, of (bytes, mode) to a resulting image of (bytes, bits)
-    fullArray = np.concatenate((imgBits[:,:(8-mode)], dataLong), 1)   
+    fullArray = np.concatenate((imgBits[:, :(8 - mode)], dataLong), 1)
 
     # ((bytes, bits) -> flattened bits -> bitString -> BitArray -> flattened bytes -> shaped bytes); 
 
-    outputArr = np.array(bytearray(BitArray( bin="".join(fullArray.flatten()) ).bytes)).reshape(inImg.shape[0], inImg.shape[1], inImg.shape[2])
+    outputArr = np.array(bytearray(BitArray(bin="".join(fullArray.flatten())).bytes)).reshape(inImg.shape[0], inImg.shape[1], inImg.shape[2])
 
     cv2.imwrite(outImgPath, outputArr)
 
@@ -167,7 +165,7 @@ def LSBEncode(inImgPath, data, outImgPath, mode):
 
 def LSBDecode(inImgPath, outPath, mode, fileSize):
 
-    # In this case, -2 is indicitive of an invalid mode
+    # In this case, -2 is indicative of an invalid mode
     if mode > 8 or mode < 1 or not float(mode).is_integer():
         return -2
 
@@ -184,23 +182,23 @@ def LSBDecode(inImgPath, outPath, mode, fileSize):
     imgBits = np.array(list(BitArray(bytes=flattened).bin)).reshape([len(flattened), 8])
 
     # Will read every byte from the image if no fileSize could be read from metadata
-    fileSize = len(flattened)*mode // 8 if fileSize == -1 else fileSize
+    fileSize = len(flattened) * mode // 8 if fileSize == -1 else fileSize
 
     # Relevant bits are extracted, padding 0s are dropped
     # (bytes, bits) -> ({fileSizeBits/mode} bytes, {mode} bits) -> padded flattened bits ->  relevant flattened bits -> bitString
-    bits = "".join(imgBits[0:(fileSize*8//mode), (8-mode):].flatten())[0:fileSize*8]
+    bits = "".join(imgBits[0:(fileSize * 8 // mode), (8 - mode):].flatten())[0:fileSize * 8]
 
     # bitString -> BitArray -> bytes -> file
     outFile.write(BitArray(bin=bits).bytes)
 
     return 0
 
+
 def LSBCEncode(inImgPath, data, outImgPath, mode, channel):
-    
-        # In this case, -2 is indicitive of an invalid mode
+
+    # In this case, -2 is indicative of an invalid mode
     if mode > 8 or mode < 1 or not float(mode).is_integer():
         return -2
-
 
     inImg = cv2.imread(inImgPath, cv2.IMREAD_UNCHANGED)
 
@@ -211,7 +209,7 @@ def LSBCEncode(inImgPath, data, outImgPath, mode, channel):
 
     # Creates a bitstring padded to a multiple of {mode}
     dataBitString = list(BitArray(bytes=data).bin) 
-    dataBitString += ["0"]*(mode - len(dataBitString)%mode if len(dataBitString) % mode else 0)
+    dataBitString += ["0"] * (mode - len(dataBitString) % mode if len(dataBitString) % mode else 0)
 
     # Initial array of data, padding 0s will be cut during bitString slicing at decode
     dataArray = np.array(dataBitString).reshape([len(dataBitString) // mode, mode])
@@ -230,14 +228,14 @@ def LSBCEncode(inImgPath, data, outImgPath, mode, channel):
         return -1
 
     # matches dataArray to the length of the image, reducing suspicion due to a cutoff of noise
-    dataLong = np.concatenate([dataArray]*(imgBits.shape[0] // dataArray.shape[0]) + [ dataArray[0:(imgBits.shape[0] % dataArray.shape[0])] ]) 
+    dataLong = np.concatenate([dataArray] * (imgBits.shape[0] // dataArray.shape[0]) + [dataArray[0:(imgBits.shape[0] % dataArray.shape[0])]])
 
     # Merges imgBits of (bytes, 8-mode) and dataLong, of (bytes, mode) to a resulting image of (bytes, bits)
-    fullArray = np.concatenate((imgBits[:,:(8-mode)], dataLong), 1)   
+    fullArray = np.concatenate((imgBits[:, :(8-mode)], dataLong), 1)
 
     # ((bytes, bits) -> flattened bits -> bitString -> BitArray -> flattened bytes -> shaped channel bytes -> full img); 
 
-    outputArr = np.array(bytearray(BitArray( bin="".join(fullArray.flatten()) ).bytes))
+    outputArr = np.array(bytearray(BitArray(bin="".join(fullArray.flatten())).bytes))
 
     inImg[:, :, channel] = np.reshape(outputArr, (inImg.shape[0], inImg.shape[1]))
 
@@ -247,7 +245,7 @@ def LSBCEncode(inImgPath, data, outImgPath, mode, channel):
 
 def LSBCDecode(inImgPath, outPath, mode, channel, fileSize):
     
-    # In this case, -2 is indicitive of an invalid mode
+    # In this case, -2 is indicative of an invalid mode
     if mode > 8 or mode < 1 or not float(mode).is_integer():
         return -2
 
