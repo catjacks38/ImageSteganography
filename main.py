@@ -59,7 +59,7 @@ def main():
         else:
             raiseErrorAndExit(f"The path, \"{args.data}\" is  not a folder.")
 
-     elif args.method == "LSBEncode":
+    elif args.method == "LSBEncode":
         if os.path.isfile(args.data):
             with open(args.data, "rb") as dataFile:
                 data = dataFile.read()
