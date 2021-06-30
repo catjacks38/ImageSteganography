@@ -1,4 +1,3 @@
-from numpy.lib import utils
 import ImageSteganography
 import os
 import argparse
