@@ -40,7 +40,7 @@ Linux: `./ImageSteganography [--help/-h] --method/-m {append, LSBEncode, LSBDeco
 
 `--channel/-c`: The image channel to encode/decode the data from. It's a number from one to four. Channel one is red, channel two is green, channel three is blue, and channel four is alpha. You must use this argument for the "dataToChannel", "channelToData", "LSBCEncode", and "LSBCDecode" methods. (optional/required)
 
-`--LSBMode/-l`: The amount of least significant bits that will be used to encode/decode the data per pixel. Can only be a value from one to eight. You must use this argument for the "LSBDecode" and "LSBCDecode" methods. If the flag isn't used/specified for the "LSBEncode" or the "LSBCEncode" method, the optimal LSBMode will be automatically selected. (optional/required)
+`--LSBMode/-l`: The amount of least significant bits that will be used to encode/decode the data per pixel. Can only be a value from one to eight. If the flag isn't used/specified for the "LSBEncode" or the "LSBCEncode" method, the optimal LSBMode will be automatically selected. If the flag isn't used/specified for the "LSBDecode" or "LSBCDecode" methods, the program will attempt to read metadata or request an approximate output file size from the user to automatically select LSBMode as a last resort. (optional/recommended)
 
 The last positional argument is the path of the output file to save. If the "autoDecode" method is used, provide a file path without the extension. The "autoDecode" method will automatically put the correct file extension at the end of the path. (required)
 
