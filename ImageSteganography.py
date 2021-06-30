@@ -166,7 +166,7 @@ def LSBEncode(inImgPath, data, outImgPath, mode):
 def LSBDecode(inImgPath, outPath, mode, fileSize):
 
     # In this case, -2 is indicative of an invalid mode
-    if mode > 8 or mode < 1 or not float(mode).is_integer():
+    if not mode in list(range(1, 9)) + [-1]:
         return -2
 
     inImg = cv2.imread(inImgPath, cv2.IMREAD_UNCHANGED)
@@ -180,6 +180,19 @@ def LSBDecode(inImgPath, outPath, mode, fileSize):
     # (shaped bytes -> flattened bytes -> BitArray -> bitString -> list of bits -> flattened bits -> (bytes, bits)) 
     flattened = inImg.flatten()
     imgBits = np.array(list(BitArray(bytes=flattened).bin)).reshape([len(flattened), 8])
+
+    if fileSize > len(flattened):
+        Utils.raiseErrorAndExit("fileSize provided too large for image, do these values appear correct?"
+                                f"\nLSBMode: {mode if mode != -1 else 'Undetermined - Using File Size'}"
+                                f"\nFile Size: {str(fileSize) + ' bytes' if fileSize != -1 else 'Undetermined - Using LSBMode'}"
+                                )
+
+    # Same process as in Utils.py to determine optimal mode, fileSize is reset to maximum incase the user was low
+    if mode == -1: 
+        mode = fileSize*8 // len(flattened) + 1
+        print(f"Determined {mode} as optimal LSBMode\nCaution: \n\tThere is a possibility this was not the mode used for encoding \n\tThe output file may be corrupted\n")
+        fileSize = -1
+    
 
     # Will read every byte from the image if no fileSize could be read from metadata
     fileSize = len(flattened) * mode // 8 if fileSize == -1 else fileSize
@@ -198,7 +211,7 @@ def LSBCEncode(inImgPath, data, outImgPath, mode, channel):
 
     # In this case, -2 is indicative of an invalid mode
     if mode > 8 or mode < 1 or not float(mode).is_integer():
-        return -2
+        return -3
 
     inImg = cv2.imread(inImgPath, cv2.IMREAD_UNCHANGED)
 
@@ -245,9 +258,9 @@ def LSBCEncode(inImgPath, data, outImgPath, mode, channel):
 
 def LSBCDecode(inImgPath, outPath, mode, channel, fileSize):
     
-    # In this case, -2 is indicative of an invalid mode
-    if mode > 8 or mode < 1 or not float(mode).is_integer():
-        return -2
+    # In this case, -1 is indicative of an invalid mode, this error should never occur given the choices for LSBMode
+    if not mode in list(range(1, 9)) + [-1]:
+        return -1
 
     inImg = cv2.imread(inImgPath, cv2.IMREAD_UNCHANGED)
 
@@ -258,8 +271,26 @@ def LSBCDecode(inImgPath, outPath, mode, channel, fileSize):
     outFile = open(outPath, "wb")
 
     # (shaped bytes -> flattened bytes -> BitArray -> bitString -> list of bits -> flattened bits -> (bytes, bits)) 
-    flattened = inImg[:, :, channel].flatten()
+    # -2 is indicitive of a non-existant channel
+    try: 
+        flattened = inImg[:, :, channel].flatten()
+    except:
+        return -2
+
     imgBits = np.array(list(BitArray(bytes=flattened).bin)).reshape([len(flattened), 8])
+
+    if fileSize > len(flattened):
+        Utils.raiseErrorAndExit("fileSize provided too large for image, do these values appear correct?"
+                                f"\nLSBMode: {mode if mode != -1 else 'Undetermined - Using File Size'}"
+                                f"\nChannel: {channel + 1}"
+                                f"\nFile Size: {str(fileSize) + ' bytes' if fileSize != -1 else 'Undetermined - Using LSBMode'}"
+                                )
+
+    # Same process as in Utils.py to determine optimal mode, fileSize is reset to maximum incase the user was low
+    if mode == -1: 
+        mode = fileSize*8 // len(flattened) + 1
+        print(f"Determined {mode} as optimal LSBMode\nCaution: \n\tThere is a possibility this was not the mode used for encoding \n\tThe output file may be corrupted\n")
+        fileSize = -1
 
     # Will read every byte from the image if no fileSize could be read from metadata
     fileSize = len(flattened)*mode // 8 if fileSize == -1 else fileSize

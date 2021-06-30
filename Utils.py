@@ -9,18 +9,20 @@ LSBCEncode = 2
 
 def raiseErrorAndExit(error):
     print("Sheesh, seems like there was an error while running this program:\n")
+    errList = error.split("\n")
+    maxSize = max(map(len, errList))
 
-    for _ in range(len(error) + 4):
-        print("=", end="")
+    print("="*(maxSize+4))
 
-    print(f"\n| {error} |")
+    for err in errList:
+        print(f"| {err + ' '*(maxSize - len(err))} |")
 
-    for _ in range(len(error) + 4):
-        print("=", end="")
+    print("="*(maxSize+4))
 
-    print("\n\nIf this doesn't help, then you might just need to play more.")
+    print("\nIf this doesn't help, then you might just need to play more.")
 
     exit(-1)
+
 
 
 def saveMetadata(outImgPath, method, option, fileSize, fileExtension):
@@ -65,10 +67,9 @@ def optimalLSBMode(inImgPath, data, isLSBC):
     else:
         maxSize = inImg.shape[0] * inImg.shape[1] * 4
 
-    # Finds lowest LSBMode to use for LSBEncode or LSBCEncode.
-    for mode in range(1, 9):
-        if dataBitSize // mode < maxSize:
-            return mode
+    # Finds lowest LSBMode to use for LSBEncode or LSBCEncode. 
+    mode = dataBitSize // maxSize + 1
 
+    return mode if mode < 9 else -1
     # If no optimal LSBMode is found, the function returns -1.
-    return -1
+
