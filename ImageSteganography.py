@@ -209,7 +209,7 @@ def LSBDecode(inImgPath, outPath, mode, fileSize):
 
 def LSBCEncode(inImgPath, data, outImgPath, mode, channel):
 
-    # In this case, -2 is indicative of an invalid mode
+    # In this case, -3 is indicative of an invalid mode
     if mode > 8 or mode < 1 or not float(mode).is_integer():
         return -3
 
