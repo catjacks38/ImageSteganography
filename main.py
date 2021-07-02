@@ -2,6 +2,7 @@ import ImageSteganography
 import os
 import argparse
 import Utils
+from json import loads
 from Utils import raiseErrorAndExit
 from sys import exit
 
@@ -17,11 +18,16 @@ def main():
     
     parser.add_argument("--LSBMode", "-l", type=int, choices=range(1, 9), help="Which LSB mode to encode/decode the image with.")
     parser.add_argument("--channel", "-c", type=int, help="The channel you would like to use to encode/decode the data")
-
+    parser.add_argument("--override", "-o", type=loads, help="For experienced users, bypasses metadata checks and reassigns variables in the provided dict\nCurrently accepted vars: fileSize")
     parser.add_argument("output", type=str, help="The path of where the encoded or decoded data will be saved to. If the \"autoDecode\" method is selected, provide the file path with no extension (the correct extension will be automatically put at the end of the file path).")
 
     args = parser.parse_args()
     fileSize = 0
+
+    if args.override:
+        if "fileSize" in args.override:
+            fileSize = int(args.override["fileSize"])
+
 
     # Input file path check.
     if not os.path.exists(args.input):
@@ -52,16 +58,19 @@ def main():
             print(f"Using optimal LSBMode of {args.LSBMode}!\n")
 
     elif (args.method in ["LSBDecode", "LSBCDecode"]) and not bool(args.LSBMode):
-        print("Missing \"LSBMode\" flag, attempting to read metadata...")
-        try:
-            args.LSBMode = Utils.readMetadata(args.input)[1][0]
-        except:
-            try: 
-                fileSize = int(float(input("Unable to read LSBMode, enter estimated size of data in bytes, scientific notation using \"e\" is permitted: \n")))
-                args.LSBMode = -1
-                os.system("cls" if os.name == "nt" else "clear")
+        if not args.override:
+            print("Missing \"LSBMode\" flag, attempting to read metadata...")
+            try:
+                args.LSBMode = Utils.readMetadata(args.input)[1][0]
             except:
-                raiseErrorAndExit("Either LSBMode or fileSize must be provided for decoding images without metadata.")
+                try: 
+                    fileSize = int(float(input("Unable to read LSBMode, enter estimated size of data in bytes, scientific notation using \"e\" is permitted: \n")))
+                    args.LSBMode = -1
+                    os.system("cls" if os.name == "nt" else "clear")
+                except:
+                    raiseErrorAndExit("Either LSBMode or fileSize must be provided for decoding images without metadata.")
+        else:
+            args.LSBMode = -1
 
 
     # PNG file checks.
@@ -99,10 +108,13 @@ def main():
 
     elif args.method == "LSBDecode":
         try:
-            fileSize = Utils.readMetadata(args.input)[2]
+            if not args.override:
+                fileSize = Utils.readMetadata(args.input)[2]
         except:
-            if not fileSize:
-                fileSize = -1
+            pass
+
+        if not fileSize:
+            fileSize = -1
             
 
         returnValue = ImageSteganography.LSBDecode(args.input, args.output, args.LSBMode, fileSize)
@@ -130,10 +142,13 @@ def main():
 
     elif args.method == "LSBCDecode":
         try:
-            fileSize = Utils.readMetadata(args.input)[2]
+            if not args.override:
+                fileSize = Utils.readMetadata(args.input)[2]
         except:
-            if not fileSize:
-                fileSize = -1
+            pass
+
+        if not fileSize:
+            fileSize = -1
             
 
         returnValue = ImageSteganography.LSBCDecode(args.input, args.output, args.LSBMode, args.channel - 1, fileSize)
@@ -159,8 +174,12 @@ def main():
 
     elif args.method == "channelToData": 
         try:
-            fileSize = Utils.readMetadata(args.input)[2]
+            if not args.override:
+                fileSize = Utils.readMetadata(args.input)[2]
         except:
+            pass
+
+        if not fileSize:
             fileSize = -1
             
 
