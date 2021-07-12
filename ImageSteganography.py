@@ -166,7 +166,7 @@ def LSBEncode(inImgPath, data, outImgPath, mode):
 def LSBDecode(inImgPath, outPath, mode, fileSize):
 
     # In this case, -2 is indicative of an invalid mode
-    if not mode in list(range(1, 9)) + [-1]:
+    if not mode in list(range(1, 9)) + [-2, -1]:
         return -2
 
     inImg = cv2.imread(inImgPath, cv2.IMREAD_UNCHANGED)
@@ -192,7 +192,8 @@ def LSBDecode(inImgPath, outPath, mode, fileSize):
         mode = fileSize*8 // len(flattened) + 1
         print(f"Determined {mode} as optimal LSBMode\nCaution: \n\tThere is a possibility this was not the mode used for encoding \n\tThe output file may be corrupted\n")
         fileSize = -1
-    
+    elif mode == -2:
+        mode = fileSize*8 // len(flattened) + 1    
 
     # Will read every byte from the image if no fileSize could be read from metadata
     fileSize = len(flattened) * mode // 8 if fileSize == -1 else fileSize
