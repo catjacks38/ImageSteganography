@@ -18,7 +18,7 @@ def main():
     
     parser.add_argument("--LSBMode", "-l", type=int, choices=range(1, 9), help="Which LSB mode to encode/decode the image with.")
     parser.add_argument("--channel", "-c", type=int, help="The channel you would like to use to encode/decode the data")
-    parser.add_argument("--override", "-o", type=loads, help="For experienced users, bypasses metadata checks and reassigns variables in the provided dict\nCurrently accepted vars: fileSize")
+    parser.add_argument("--override", "-o", type=loads, help="For experienced users, bypasses metadata checks and reassigns variables in the provided dict\nCurrently accepted vars: fileSize, bypassNullLSB")
     parser.add_argument("output", type=str, help="The path of where the encoded or decoded data will be saved to. If the \"autoDecode\" method is selected, provide the file path with no extension (the correct extension will be automatically put at the end of the file path).")
 
     args = parser.parse_args()
@@ -27,6 +27,10 @@ def main():
     if args.override:
         if "fileSize" in args.override:
             fileSize = int(args.override["fileSize"])
+        if "bypassNullLSB" in args.override:
+            args.LSBMode = -2 if args.override["bypassNullLSB"] else None
+    elif args.override==dict():
+        args.override = True
 
 
     # Input file path check.

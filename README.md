@@ -42,6 +42,9 @@ Linux: `./ImageSteganography [--help/-h] --method/-m {append, LSBEncode, LSBDeco
 
 `--LSBMode/-l`: The amount of least significant bits that will be used to encode/decode the data per pixel. Can only be a value from one to eight. If the flag isn't used/specified for the "LSBEncode" or the "LSBCEncode" method, the optimal LSBMode will be automatically selected. If the flag isn't used/specified for the "LSBDecode" or "LSBCDecode" methods, the program will attempt to read metadata or request an approximate output file size from the user to automatically select LSBMode as a last resort. (optional/recommended)
 
+`--override/-o`: Intended for developers, this flag bypasses all metadata checks and accepts a properly escaped and json-formatted dict containing variables to be set. Presently, fileSize in bytes (float -> int) and bypassNullLSB (bool) are the only arguments accepted, fileSize being treated as an estimate excepting the use of bypassNullLSB or the presence an LSBMode flag. Bash and most other quote-neutral terminals will accept `{\"fileSize\":9e5}`, powershell requires ``{\`"fileSize\`":9e5}``. All dict keys are optional, so an empty dict can be passed to just ignore corrupted/incorrect metadata. (optional/cautioned)
+
+
 The last positional argument is the path of the output file to save. If the "autoDecode" method is used, provide a file path without the extension. The "autoDecode" method will automatically put the correct file extension at the end of the path. (required)
 
 \**If you are using the "append" method the source data must be a folder. But if you are using the "LSBEncode", the "LSBCEncode", or the "dataToChannel" method, the source data must be a file.*
