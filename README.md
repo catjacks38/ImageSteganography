@@ -15,9 +15,9 @@ https://en.wikipedia.org/wiki/Steganography
 6. pillow
 
 ## CLI Usage:
-Windows: `ImageSteganography.exe [--help/-h] --method/-m {append, LSBEncode, LSBDecode, LSBCEncode, LSBCDecode, dataToChannel, channelToData, autoDecode} --input/-i <input file path> [--data/-d <data file path>] [--channel/-c <channel>] [--LSBMode {1-8}] <output file path>`
+Windows: `ImageSteganography.exe [--help/-h] --method/-m {append, LSBEncode, LSBDecode, LSBCEncode, LSBCDecode, dataToChannel, channelToData, autoDecode} --input/-i <input file path> [--data/-d <data file path>] [--channel/-c <channel>] [--LSBMode {1-8}] [--overide/-o <override dict>] <output file path>`
 
-Linux: `./ImageSteganography [--help/-h] --method/-m {append, LSBEncode, LSBDecode, LSBCEncode, LSBCDecode, dataToChannel, channelToData, autoDecode} --input/-i <input file path> [--data/-d <data file path>] [--channel/-c <channel>] [--LSBMode {1-8}] <output file path>`
+Linux: `./ImageSteganography [--help/-h] --method/-m {append, LSBEncode, LSBDecode, LSBCEncode, LSBCDecode, dataToChannel, channelToData, autoDecode} --input/-i <input file path> [--data/-d <data file path>] [--channel/-c <channel>] [--LSBMode {1-8}] [--overide/-o <override dict>] <output file path>`
 
 ## Argument Explanation:
 `--help/-h`: Shows the help screen. (optional)
