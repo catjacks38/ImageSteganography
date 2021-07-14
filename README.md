@@ -15,9 +15,9 @@ https://en.wikipedia.org/wiki/Steganography
 6. pillow
 
 ## CLI Usage:
-Windows: `ImageSteganography.exe [--help/-h] --method/-m {append, LSBEncode, LSBDecode, LSBCEncode, LSBCDecode, dataToChannel, channelToData, autoDecode} --input/-i <input file path> [--data/-d <data file path>] [--channel/-c <channel>] [--LSBMode {1-8}] <output file path>`
+Windows: `ImageSteganography.exe [--help/-h] --method/-m {append, LSBEncode, LSBDecode, LSBCEncode, LSBCDecode, dataToChannel, channelToData, autoDecode} --input/-i <input file path> [--data/-d <data file path>] [--channel/-c <channel>] [--LSBMode {1-8}] [--overide/-o <override dict>] <output file path>`
 
-Linux: `./ImageSteganography [--help/-h] --method/-m {append, LSBEncode, LSBDecode, LSBCEncode, LSBCDecode, dataToChannel, channelToData, autoDecode} --input/-i <input file path> [--data/-d <data file path>] [--channel/-c <channel>] [--LSBMode {1-8}] <output file path>`
+Linux: `./ImageSteganography [--help/-h] --method/-m {append, LSBEncode, LSBDecode, LSBCEncode, LSBCDecode, dataToChannel, channelToData, autoDecode} --input/-i <input file path> [--data/-d <data file path>] [--channel/-c <channel>] [--LSBMode {1-8}] [--overide/-o <override dict>] <output file path>`
 
 ## Argument Explanation:
 `--help/-h`: Shows the help screen. (optional)
@@ -40,7 +40,10 @@ Linux: `./ImageSteganography [--help/-h] --method/-m {append, LSBEncode, LSBDeco
 
 `--channel/-c`: The image channel to encode/decode the data from. It's a number from one to four. Channel one is red, channel two is green, channel three is blue, and channel four is alpha. You must use this argument for the "dataToChannel", "channelToData", "LSBCEncode", and "LSBCDecode" methods. (optional/required)
 
-`--LSBMode/-l`: The amount of least significant bits that will be used to encode/decode the data per pixel. Can only be a value from one to eight. You must use this argument for the "LSBDecode" and "LSBCDecode" methods. If the flag isn't used/specified for the "LSBEncode" or the "LSBCEncode" method, the optimal LSBMode will be automatically selected. (optional/required)
+`--LSBMode/-l`: The amount of least significant bits that will be used to encode/decode the data per pixel. Can only be a value from one to eight. If the flag isn't used/specified for the "LSBEncode" or the "LSBCEncode" method, the optimal LSBMode will be automatically selected. If the flag isn't used/specified for the "LSBDecode" or "LSBCDecode" methods, the program will attempt to read metadata or request an approximate output file size from the user to automatically select LSBMode as a last resort. (optional/recommended)
+
+`--override/-o`: Intended for developers, this flag bypasses all metadata checks and accepts a properly escaped and json-formatted dict containing variables to be set. Presently, `fileSize` in bytes (float -> int) and `bypassNullLSB` (bool) are the only arguments accepted, `fileSize` being treated as an estimate excepting the use of `bypassNullLSB` or the presence an LSBMode flag. `bypassNullLSB` changes the behavior of `fileSize` from an estimate (used for LSBMode calculation, but size of output file is the maximum possible given image size and LSBMode) to a hard output size (exact number of bytes, as it would be with an explicit LSBMode). Bash and most other quote-neutral terminals will accept `{\"fileSize\":9e5}`, Powershell requires ``{\`"fileSize\`":9e5}``. All dict keys are optional, so an empty dict can be passed to just ignore corrupted/incorrect metadata. (optional/cautioned)
+
 
 The last positional argument is the path of the output file to save. If the "autoDecode" method is used, provide a file path without the extension. The "autoDecode" method will automatically put the correct file extension at the end of the path. (required)
 
