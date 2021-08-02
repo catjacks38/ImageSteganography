@@ -89,6 +89,3 @@ Run this command:
 Windows: `ImageSteganography.exe --method LSBDecode --input <the path to the image you want to decode> --channel <channel where the data was encoded into> --LSBMode <the LSBMode of the encoded data> <path to the decoded data that will be saved>`
 
 Linux: `./ImageSteganography --method LSBDecode --input <the path to the image you want to decode> --channel <channel where the data was encoded into> --LSBMode <the LSBMode of the encoded data> <path to the decoded data that will be saved>`
-
-## TODO:
-1. Improve and refactor code
