@@ -345,8 +345,6 @@ def autoDecode(inImgPath, outPath):
     else:
         return -3
 
-
-
     # Returns the return value of the method that was used.
     # Should be 0 if there was no errors.
     return returnValue

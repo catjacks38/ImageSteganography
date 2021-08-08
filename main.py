@@ -32,7 +32,6 @@ def main():
     elif args.override==dict():
         args.override = True
 
-
     # Input file path check.
     if not os.path.exists(args.input):
          raiseErrorAndExit("File not found. Please check your file paths, and make sure they exist.")
@@ -76,7 +75,6 @@ def main():
         else:
             args.LSBMode = -1
 
-
     # PNG file checks.
     if (args.method in ["LSBEncode", "LSBCEncode", "dataToChannel"]) and args.output.split(".")[-1] != "png":
         raiseErrorAndExit("Output file must be a \"PNG\" file.")
@@ -119,7 +117,6 @@ def main():
 
         if not fileSize:
             fileSize = -1
-            
 
         returnValue = ImageSteganography.LSBDecode(args.input, args.output, args.LSBMode, fileSize)
 
@@ -153,7 +150,6 @@ def main():
 
         if not fileSize:
             fileSize = -1
-            
 
         returnValue = ImageSteganography.LSBCDecode(args.input, args.output, args.LSBMode, args.channel - 1, fileSize)
 
@@ -185,7 +181,6 @@ def main():
 
         if not fileSize:
             fileSize = -1
-            
 
         returnValue = ImageSteganography.channelToData(args.input, args.output, args.channel - 1, fileSize)
 

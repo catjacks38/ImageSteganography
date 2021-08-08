@@ -72,4 +72,3 @@ def optimalLSBMode(inImgPath, data, isLSBC):
 
     return mode if mode < 9 else -1
     # If no optimal LSBMode is found, the function returns -1.
-
