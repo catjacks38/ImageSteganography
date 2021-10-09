@@ -1,3 +1,5 @@
+import warnings
+
 import ImageSteganography
 import os
 import argparse
