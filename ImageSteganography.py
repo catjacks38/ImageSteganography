@@ -257,6 +257,7 @@ def LSBCEncode(inImgPath, data, outImgPath, mode, channel):
 
     return 0
 
+
 def LSBCDecode(inImgPath, outPath, mode, channel, fileSize):
     
     # In this case, -1 is indicative of an invalid mode, this error should never occur given the choices for LSBMode
@@ -348,3 +349,19 @@ def autoDecode(inImgPath, outPath):
     # Returns the return value of the method that was used.
     # Should be 0 if there was no errors.
     return returnValue
+
+
+def discordEncode(inImgPath, outImgPath, lightMode=False):
+    img = cv2.imread(inImgPath)
+
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    finalImg = cv2.cvtColor(img, cv2.COLOR_GRAY2BGRA)
+
+    finalImg[:, :, 3] = img
+
+    if lightMode:
+        finalImg[:, :, :3] = [255, 255, 255]
+    else:
+        finalImg[:, :, :3] = [63, 57, 54]
+
+    cv2.imwrite(outImgPath, finalImg)
