@@ -1,5 +1,3 @@
-import warnings
-
 import ImageSteganography
 import os
 import argparse
@@ -13,7 +11,7 @@ def main():
     parser = argparse.ArgumentParser(description="A simple program that can be used to encode data into images using steganography.")
 
     # Adds arguments to parser.
-    parser.add_argument("--method", "-m", type=str, choices=["append", "LSBEncode", "LSBDecode", "LSBCEncode", "LSBCDecode", "dataToChannel", "channelToData", "autoDecode"], help="The method that will be used to encode/decode the data.", required=True)
+    parser.add_argument("--method", "-m", type=str, choices=["append", "LSBEncode", "LSBDecode", "LSBCEncode", "LSBCDecode", "dataToChannel", "channelToData", "autoDecode", "discordEncode"], help="The method that will be used to encode/decode the data.", required=True)
 
     parser.add_argument("--input", "-i", type=str, help="The path to the image you want to decode/encode.", required=True)
     parser.add_argument("--data", "-d", type=str, help="The path to the data you want to encode into the output image.")
@@ -21,6 +19,7 @@ def main():
     parser.add_argument("--LSBMode", "-l", type=int, choices=range(1, 9), help="Which LSB mode to encode/decode the image with.")
     parser.add_argument("--channel", "-c", type=int, help="The channel you would like to use to encode/decode the data")
     parser.add_argument("--override", "-o", type=loads, help="For experienced users, bypasses metadata checks and reassigns variables in the provided dict\nCurrently accepted vars: fileSize, bypassNullLSB")
+    parser.add_argument("--lightMode", "-L", action="store_true", help="If you want to the image to be hidden to light mode users. By default, the image will hidden to dark mode.")
     parser.add_argument("output", type=str, help="The path of where the encoded or decoded data will be saved to. If the \"autoDecode\" method is selected, provide the file path with no extension (the correct extension will be automatically put at the end of the file path).")
 
     args = parser.parse_args()
@@ -31,7 +30,7 @@ def main():
             fileSize = int(args.override["fileSize"])
         if "bypassNullLSB" in args.override:
             args.LSBMode = -2 if args.override["bypassNullLSB"] else None
-    elif args.override==dict():
+    elif args.override == dict():
         args.override = True
 
     # Input file path check.
@@ -39,7 +38,7 @@ def main():
          raiseErrorAndExit("File not found. Please check your file paths, and make sure they exist.")
 
     # Data flag and file path check:
-    if not args.method in ["LSBDecode", "channelToData", "autoDecode", "LSBCDecode"]:
+    if not args.method in ["LSBDecode", "channelToData", "autoDecode", "LSBCDecode", "discordEncode"]:
         if bool(args.data):
             if not os.path.exists(args.data):
                 raiseErrorAndExit("File not found. Please check your file paths, and make sure they exist.")
@@ -78,7 +77,7 @@ def main():
             args.LSBMode = -1
 
     # PNG file checks.
-    if (args.method in ["LSBEncode", "LSBCEncode", "dataToChannel"]) and args.output.split(".")[-1] != "png":
+    if (args.method in ["LSBEncode", "LSBCEncode", "dataToChannel", "discordEncode"]) and args.output.split(".")[-1] != "png":
         raiseErrorAndExit("Output file must be a \"PNG\" file.")
 
     if args.method == "autoDecode" and args.input.split(".")[-1] != "png":
@@ -194,6 +193,9 @@ def main():
 
         if returnValue != 0:
             raiseErrorAndExit("Input image has corrupted or non-existent metadata to be auto decoded.")
+
+    elif args.method == "discordEncode":
+        ImageSteganography.discordEncode(args.input, args.output, lightMode=args.lightMode)
 
     # Prints success message and exits function.
     print("Operation Successfully Completed!")

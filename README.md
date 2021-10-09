@@ -31,6 +31,7 @@ Linux: `./ImageSteganography [--help/-h] --method/-m {append, LSBEncode, LSBDeco
 6. dataToChannel
 7. channelToData
 8. autoDecode
+9. discordEncode
 
 (required)
 
@@ -44,6 +45,8 @@ Linux: `./ImageSteganography [--help/-h] --method/-m {append, LSBEncode, LSBDeco
 
 `--override/-o`: Intended for developers, this flag bypasses all metadata checks and accepts a properly escaped and json-formatted dict containing variables to be set. Presently, `fileSize` in bytes (float -> int) and `bypassNullLSB` (bool) are the only arguments accepted, `fileSize` being treated as an estimate excepting the use of `bypassNullLSB` or the presence an LSBMode flag. `bypassNullLSB` changes the behavior of `fileSize` from an estimate (used for LSBMode calculation, but size of output file is the maximum possible given image size and LSBMode) to a hard output size (exact number of bytes, as it would be with an explicit LSBMode). Bash and most other quote-neutral terminals will accept `{\"fileSize\":9e5}`, Powershell requires ``{\`"fileSize\`":9e5}``. All dict keys are optional, so an empty dict can be passed to just ignore corrupted/incorrect metadata. (optional/cautioned)
 
+`--lightMode/-L`: If you want to the image to be hidden to light mode users. By default, the image will hidden to dark mode.
+
 
 The last positional argument is the path of the output file to save. If the "autoDecode" method is used, provide a file path without the extension. The "autoDecode" method will automatically put the correct file extension at the end of the path. (required)
 
@@ -54,6 +57,7 @@ The last positional argument is the path of the output file to save. If the "aut
 2. The "dataToChannel" method encodes the data into a specific channel. This method is less efficient than the "dataToPix" method, but it changes the pixel data of the image less. This should not increase image size too much.
 3. The "LSBEncode" method writes each bit from the source data into the least significant bits of your choice (LSBMode) of each channel value in the image. Using a smaller LSBMode is less noticeable than a higher LSBMode, but you will need a larger image to store the same amount of data. If you set the LSBMode to eight, it will give results like what the old "dataToPix" method used to do. Due to the higher complexity of this method, it takes longer to encode and decode compared to the other methods. But it isn't too much longer.
 4. The "LSBCEncode" method does the same thing as the "LSBEncode" method, but it writes the bits to just one channel (similar to what the "dataToChannel" method does).
+5. The "discordEncode" method converts the input image to grayscale. After that, the final image's alpha channel gets set to the grayscale image. Then the final image's RGB values are set to (54, 57, 63) unless the `--lightMode` flag is supplied, then the RGB values will be set to (255, 255, 255).
 
 ## How to View the Hidden Data:
 
