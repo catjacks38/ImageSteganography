@@ -15,9 +15,9 @@ https://en.wikipedia.org/wiki/Steganography
 6. pillow
 
 ## CLI Usage:
-Windows: `ImageSteganography.exe [--help/-h] --method/-m {append, LSBEncode, LSBDecode, LSBCEncode, LSBCDecode, dataToChannel, channelToData, autoDecode} --input/-i <input file path> [--data/-d <data file path>] [--channel/-c <channel>] [--LSBMode {1-8}] [--overide/-o <override dict>] <output file path>`
+Windows: `ImageSteganography.exe [--help/-h] --method/-m {append, LSBEncode, LSBDecode, LSBCEncode, LSBCDecode, dataToChannel, channelToData, autoDecode, discordEncode} --input/-i <input file path> [--data/-d <data file path>] [--channel/-c <channel>] [--LSBMode {1-8}] [--overide/-o <override dict>] [--lightMode/-L] <output file path>`
 
-Linux: `./ImageSteganography [--help/-h] --method/-m {append, LSBEncode, LSBDecode, LSBCEncode, LSBCDecode, dataToChannel, channelToData, autoDecode} --input/-i <input file path> [--data/-d <data file path>] [--channel/-c <channel>] [--LSBMode {1-8}] [--overide/-o <override dict>] <output file path>`
+Linux: `./ImageSteganography [--help/-h] --method/-m {append, LSBEncode, LSBDecode, LSBCEncode, LSBCDecode, dataToChannel, channelToData, autoDecode, discordEncode} --input/-i <input file path> [--data/-d <data file path>] [--channel/-c <channel>] [--LSBMode {1-8}] [--overide/-o <override dict>] [--lightMode/-L] <output file path>`
 
 ## Argument Explanation:
 `--help/-h`: Shows the help screen. (optional)
@@ -45,7 +45,7 @@ Linux: `./ImageSteganography [--help/-h] --method/-m {append, LSBEncode, LSBDeco
 
 `--override/-o`: Intended for developers, this flag bypasses all metadata checks and accepts a properly escaped and json-formatted dict containing variables to be set. Presently, `fileSize` in bytes (float -> int) and `bypassNullLSB` (bool) are the only arguments accepted, `fileSize` being treated as an estimate excepting the use of `bypassNullLSB` or the presence an LSBMode flag. `bypassNullLSB` changes the behavior of `fileSize` from an estimate (used for LSBMode calculation, but size of output file is the maximum possible given image size and LSBMode) to a hard output size (exact number of bytes, as it would be with an explicit LSBMode). Bash and most other quote-neutral terminals will accept `{\"fileSize\":9e5}`, Powershell requires ``{\`"fileSize\`":9e5}``. All dict keys are optional, so an empty dict can be passed to just ignore corrupted/incorrect metadata. (optional/cautioned)
 
-`--lightMode/-L`: If you want to the image to be hidden to light mode users. By default, the image will hidden to dark mode.
+`--lightMode/-L`: If you want to the image to be hidden to light mode users. By default, the image will hidden to dark mode users. (optional)
 
 
 The last positional argument is the path of the output file to save. If the "autoDecode" method is used, provide a file path without the extension. The "autoDecode" method will automatically put the correct file extension at the end of the path. (required)
@@ -69,6 +69,9 @@ Windows: `ImageSteganography.exe --method autoDecode --input <the path to the in
 Linux: `./ImageSteganography --method autoDecode --input <the path to the input image you want to decode> <path to decoded output without the file extension>`
 
 If this method returns the error, "Input image has corrupted or non-existent metadata to be auto decoded.", the "autoDecode" method will not work. Try the other methods.
+
+### If the image uses the "discordEncode" method:
+Open the image in the Discord image previewer.
 
 ### If the image uses the "append" method:
 Open the image in a zip extractor, and extract the contents. Any zip extractor should work. I used 7-Zip while testing this method.
