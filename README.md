@@ -10,9 +10,8 @@ https://en.wikipedia.org/wiki/Steganography
 1. Python 3
 2. opencv-python
 3. bitstring
-4. tqdm
-5. numpy
-6. pillow
+4. numpy
+5. pillow
 
 ## CLI Usage:
 Windows: `ImageSteganography.exe [--help/-h] --method/-m {append, LSBEncode, LSBDecode, LSBCEncode, LSBCDecode, dataToChannel, channelToData, autoDecode, discordEncode} --input/-i <input file path> [--data/-d <data file path>] [--channel/-c <channel>] [--LSBMode {1-8}] [--overide/-o <override dict>] [--lightMode/-L] <output file path>`
