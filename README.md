@@ -7,16 +7,13 @@ Here is a Wikipedia article on steganography, if you don't know what it is:
 https://en.wikipedia.org/wiki/Steganography
 
 ## Script Requirements:
-1. Python 3
-2. opencv-python
-3. bitstring
-4. numpy
-5. pillow
+Script made for Python 3
+
+Install requirements with `pip3 install -r requirements.txt`
 
 ## CLI Usage:
-Windows: `ImageSteganography.exe [--help/-h] --method/-m {append, LSBEncode, LSBDecode, LSBCEncode, LSBCDecode, dataToChannel, channelToData, autoDecode, discordEncode} --input/-i <input file path> [--data/-d <data file path>] [--channel/-c <channel>] [--LSBMode {1-8}] [--overide/-o <override dict>] [--lightMode/-L] <output file path>`
 
-Linux: `./ImageSteganography [--help/-h] --method/-m {append, LSBEncode, LSBDecode, LSBCEncode, LSBCDecode, dataToChannel, channelToData, autoDecode, discordEncode} --input/-i <input file path> [--data/-d <data file path>] [--channel/-c <channel>] [--LSBMode {1-8}] [--overide/-o <override dict>] [--lightMode/-L] <output file path>`
+`ImageSteganography [--help/-h] --method/-m {append, LSBEncode, LSBDecode, LSBCEncode, LSBCDecode, dataToChannel, channelToData, autoDecode, discordEncode} --input/-i <input file path> [--data/-d <data file path>] [--channel/-c <channel>] [--LSBMode {1-8}] [--overide/-o <override dict>] [--lightMode/-L] <output file path>`
 
 ## Argument Explanation:
 `--help/-h`: Shows the help screen. (optional)
@@ -63,9 +60,7 @@ The last positional argument is the path of the output file to save. If the "aut
 ### Suggested method (try this first):
 Run this command:
 
-Windows: `ImageSteganography.exe --method autoDecode --input <the path to the input image you want to decode> <path to decoded output without the file extension>`
-
-Linux: `./ImageSteganography --method autoDecode --input <the path to the input image you want to decode> <path to decoded output without the file extension>`
+`ImageSteganography --method autoDecode --input <the path to the input image you want to decode> <path to decoded output without the file extension>`
 
 If this method returns the error, "Input image has corrupted or non-existent metadata to be auto decoded.", the "autoDecode" method will not work. Try the other methods.
 
@@ -78,20 +73,14 @@ Open the image in a zip extractor, and extract the contents. Any zip extractor s
 ### If the image uses the "LSBEncode" method:
 Run this command:
 
-Windows: `ImageSteganography.exe --method LSBDecode --input <the path to the image you want to decode> --LSBMode <the LSBMode of the encoded data> <path to the decoded data that will be saved>`
-
-Linux: `./ImageSteganography --method LSBDecode --input <the path to the image you want to decode> --LSBMode <the LSBMode of the encoded data> <path to the decoded data that will be saved>`
+`ImageSteganography --method LSBDecode --input <the path to the image you want to decode> --LSBMode <the LSBMode of the encoded data> <path to the decoded data that will be saved>`
 
 ### If the image uses the "dataToChannel" method:
 Run this command:
 
-Windows: `ImageSteganography.exe --method channelToData --input <the path to the image you want to decode> --channel <channel where the data was encoded into> <path to the decoded data that will be saved>`
-
-Linux: `./ImageSteganography --method channelToData --input <the path to the image you want to decode> --channel <channel where the data was encoded into> <path to the decoded data that will be saved>`
+`ImageSteganography --method channelToData --input <the path to the image you want to decode> --channel <channel where the data was encoded into> <path to the decoded data that will be saved>`
 
 ### If the image uses the "LSBCEncode" method:
 Run this command:
 
-Windows: `ImageSteganography.exe --method LSBDecode --input <the path to the image you want to decode> --channel <channel where the data was encoded into> --LSBMode <the LSBMode of the encoded data> <path to the decoded data that will be saved>`
-
-Linux: `./ImageSteganography --method LSBDecode --input <the path to the image you want to decode> --channel <channel where the data was encoded into> --LSBMode <the LSBMode of the encoded data> <path to the decoded data that will be saved>`
+`ImageSteganography --method LSBDecode --input <the path to the image you want to decode> --channel <channel where the data was encoded into> --LSBMode <the LSBMode of the encoded data> <path to the decoded data that will be saved>`
